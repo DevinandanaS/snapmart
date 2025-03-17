@@ -5,16 +5,22 @@ import { Header } from "@/components/Header";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, Clock, MapPin, ArrowLeft, Home, ChevronRight } from "lucide-react";
+import { Star, Clock, MapPin, ArrowLeft, Home, ChevronRight, ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
 import { getSupermarketById, getProductsBySupermarketId } from "@/lib/data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { ProductCard } from "@/components/ProductCard";
+import { CategoryIcon } from "@/components/CategoryIcon";
+import { Product } from "@/lib/types";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function SupermarketDetail() {
   const { id } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
+  const [cart, setCart] = useState<Record<string, number>>({});
+  const { toast } = useToast();
   
   const supermarket = id ? getSupermarketById(id) : undefined;
   const products = id ? getProductsBySupermarketId(id) : [];
@@ -26,6 +32,23 @@ export default function SupermarketDetail() {
     }, 800);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleAddToCart = (product: Product, quantity: number) => {
+    setCart(prev => ({
+      ...prev,
+      [product.id]: quantity
+    }));
+    
+    if (quantity > 0) {
+      toast({
+        description: `Added ${product.name} to cart`,
+      });
+    } else {
+      toast({
+        description: `Removed ${product.name} from cart`,
+      });
+    }
+  };
 
   if (!supermarket && !isLoading) {
     return (
@@ -48,6 +71,7 @@ export default function SupermarketDetail() {
   }
 
   const categories = ["all", ...new Set(products.map(p => p.category.toLowerCase()))];
+  const itemCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
 
   return (
     <div className="min-h-screen pb-20">
@@ -95,6 +119,19 @@ export default function SupermarketDetail() {
                 </Link>
               </div>
               
+              <div className="absolute top-4 right-4">
+                <Link to="/cart">
+                  <Button variant="outline" size="icon" className="bg-background/80 backdrop-blur-sm relative">
+                    <ShoppingCart className="h-5 w-5" />
+                    {itemCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {itemCount}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+              </div>
+              
               <div className="absolute bottom-4 left-4 text-white">
                 <h1 className="text-2xl font-display font-bold">{supermarket?.name}</h1>
                 <div className="flex items-center mt-1">
@@ -135,8 +172,9 @@ export default function SupermarketDetail() {
                       <TabsTrigger
                         key={category}
                         value={category}
-                        className="rounded-full px-4 py-2 capitalize data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                        className="rounded-full px-4 py-2 capitalize data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2"
                       >
+                        <CategoryIcon category={category} size={16} />
                         {category}
                       </TabsTrigger>
                     ))}
@@ -148,41 +186,13 @@ export default function SupermarketDetail() {
                 {products
                   .filter(p => activeTab === 'all' || p.category.toLowerCase() === activeTab)
                   .map((product, index) => (
-                    <motion.div
+                    <ProductCard
                       key={product.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="bg-card rounded-lg border border-border overflow-hidden"
-                    >
-                      <div className="aspect-square bg-muted relative">
-                        <img 
-                          src={product.image || "/placeholder.svg"} 
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                        {!product.inStock && (
-                          <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                            <span className="text-sm font-medium">Out of Stock</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="p-3">
-                        <h3 className="font-medium text-sm line-clamp-1">{product.name}</h3>
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center gap-1">
-                            <span className="font-semibold">${product.price.toFixed(2)}</span>
-                            {product.originalPrice && (
-                              <span className="text-xs text-muted-foreground line-through">
-                                ${product.originalPrice.toFixed(2)}
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-xs text-muted-foreground">{product.unit}</span>
-                        </div>
-                      </div>
-                    </motion.div>
+                      product={product}
+                      onAddToCart={handleAddToCart}
+                      cartQuantity={cart[product.id] || 0}
+                      index={index}
+                    />
                   ))}
               </div>
               
@@ -192,6 +202,30 @@ export default function SupermarketDetail() {
                 </div>
               )}
             </div>
+            
+            {itemCount > 0 && (
+              <div className="fixed bottom-20 left-0 right-0 p-4 z-10">
+                <div className="container mx-auto">
+                  <Link to="/cart">
+                    <Button className="w-full flex justify-between items-center py-6">
+                      <span className="flex items-center">
+                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        View Cart • {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                      </span>
+                      <div className="flex items-center">
+                        <span className="font-semibold mr-2">
+                          ${Object.entries(cart).reduce((sum, [id, qty]) => {
+                            const product = products.find(p => p.id === id);
+                            return sum + (product ? product.price * qty : 0);
+                          }, 0).toFixed(2)}
+                        </span>
+                        <ChevronRight className="h-5 w-5" />
+                      </div>
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>
