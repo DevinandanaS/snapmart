@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Bell, ShoppingCart, User, Home } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Bell, ShoppingCart, User, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { LocationSelector } from "./LocationSelector";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const [cartItemCount, setCartItemCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(2);
   
@@ -32,6 +33,10 @@ export function Header() {
     setCartItemCount(3);
   }, []);
 
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+
   return (
     <motion.header 
       className={cn(
@@ -45,14 +50,12 @@ export function Header() {
       transition={{ duration: 0.3 }}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
-        {/* Logo and Home Button */}
+        {/* Logo and Back Button */}
         <div className="flex items-center gap-2">
           {!isHome && (
-            <Link to="/">
-              <Button variant="ghost" size="icon" className="mr-1">
-                <Home className="h-5 w-5" />
-              </Button>
-            </Link>
+            <Button variant="ghost" size="icon" className="mr-1" onClick={handleBackClick}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
           )}
           <Link to="/" className="font-display font-bold text-2xl">
             Snap<span className="text-primary">Mart</span>
