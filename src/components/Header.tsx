@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, ShoppingCart, User } from "lucide-react";
+import { Bell, ShoppingCart, User, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { LocationSelector } from "./LocationSelector";
 import { Button } from "@/components/ui/button";
@@ -45,10 +45,19 @@ export function Header() {
       transition={{ duration: 0.3 }}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="font-display font-bold text-2xl">
-          Snap<span className="text-primary">Mart</span>
-        </Link>
+        {/* Logo and Home Button */}
+        <div className="flex items-center gap-2">
+          {!isHome && (
+            <Link to="/">
+              <Button variant="ghost" size="icon" className="mr-1">
+                <Home className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
+          <Link to="/" className="font-display font-bold text-2xl">
+            Snap<span className="text-primary">Mart</span>
+          </Link>
+        </div>
         
         {/* Location Selector */}
         {scrolled && isHome ? null : <LocationSelector />}
