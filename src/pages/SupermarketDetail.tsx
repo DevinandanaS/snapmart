@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, Clock, MapPin, ArrowLeft, ChevronRight } from "lucide-react";
+import { Star, Clock, MapPin, ArrowLeft, Home, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { getSupermarketById, getProductsBySupermarketId } from "@/lib/data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,9 +37,9 @@ export default function SupermarketDetail() {
             <p className="text-muted-foreground mb-6">
               The supermarket you're looking for doesn't exist or has been removed.
             </p>
-            <Button as={Link} to="/">
-              Return to Home
-            </Button>
+            <Link to="/">
+              <Button>Return to Home</Button>
+            </Link>
           </div>
         </main>
         <Navbar />
@@ -81,16 +81,18 @@ export default function SupermarketDetail() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               </div>
               
-              <div className="absolute top-4 left-4">
-                <Button 
-                  as={Link} 
-                  to="/" 
-                  variant="outline" 
-                  size="icon" 
-                  className="bg-background/80 backdrop-blur-sm"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
+              <div className="absolute top-4 left-4 flex items-center gap-2">
+                <Link to="/">
+                  <Button variant="outline" size="icon" className="bg-background/80 backdrop-blur-sm">
+                    <Home className="h-5 w-5" />
+                  </Button>
+                </Link>
+                
+                <Link to="/search">
+                  <Button variant="outline" size="icon" className="bg-background/80 backdrop-blur-sm">
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                </Link>
               </div>
               
               <div className="absolute bottom-4 left-4 text-white">

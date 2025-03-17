@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 export default function Favorites() {
   return (
@@ -24,9 +25,11 @@ export default function Favorites() {
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             You haven't added any supermarkets or products to your favorites yet.
           </p>
-          <Button className="mx-auto" href="/">
-            Browse Supermarkets
-          </Button>
+          <Link to="/">
+            <Button className="mx-auto">
+              Browse Supermarkets
+            </Button>
+          </Link>
         </motion.div>
       </main>
       
